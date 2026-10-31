@@ -77,3 +77,33 @@ test('a user can file, appeal, review, copy, and restart a petty case', async ({
   await page.getByTestId('button-archive-0').click();
   await expect(page.locator('.ruling-title h2')).toHaveText('Putting the empty milk carton back in the fridge.');
 });
+
+test('the archive keeps only the five newest rulings in newest-first order', async ({ page }) => {
+  await page.goto('/');
+
+  const disputes = Array.from({ length: 6 }, (_, index) => `Archive limit test ruling ${index + 1}`);
+  for (const dispute of disputes) {
+    await page.getByTestId('input-dispute').fill(dispute);
+    await page.getByTestId('input-defendant').fill(`Defendant for ${dispute}`);
+    await page.getByTestId('input-plaintiff').fill(`Plaintiff for ${dispute}`);
+    await page.getByTestId('button-summon').click();
+    await expect(page.locator('.ruling-title h2')).toHaveText(dispute, { timeout: 5_000 });
+    if (dispute !== disputes[disputes.length - 1]) {
+      await page.getByTestId('button-new-dispute').click();
+    }
+  }
+
+  const archiveButtons = page.locator('.archive-list .archive-item');
+  await expect(page.locator('.archive-count')).toHaveText('5 / 5');
+  await expect(archiveButtons).toHaveCount(5);
+  for (const [index, dispute] of disputes.slice(1).reverse().entries()) {
+    await expect(page.getByTestId(`button-archive-${index}`)).toContainText(dispute);
+  }
+
+  const archivedRulings = await page.evaluate(() => JSON.parse(window.localStorage.getItem('petty-court:rulings:v1') ?? '[]') as { dispute: string }[]);
+  expect(archivedRulings.map(({ dispute }) => dispute)).toEqual(disputes.slice(1).reverse());
+  await expect(page.getByRole('button', { name: /Review ruling .*Archive limit test ruling 1$/ })).toHaveCount(0);
+
+  await page.getByTestId('button-archive-4').click();
+  await expect(page.locator('.ruling-title h2')).toHaveText(disputes[1]);
+});
