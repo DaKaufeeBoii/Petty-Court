@@ -14,6 +14,7 @@ type Ruling = CaseInput & {
   reasoning: string[]; punishment: string; finalWord: string; timestamp: string;
 };
 
+const archiveStorageKey = 'petty-court:rulings:v1';
 const verdicts: VerdictName[] = ['GUILTY', 'ABSOLUTELY GUILTY', 'BOTH ARE DISQUALIFIED', 'ACQUITTED (Barely)'];
 const statutes = [
   'The Unauthorized Thermostat Adjustment Act, § 4(b)',
@@ -99,6 +100,27 @@ const samples: (CaseInput & { short: string; category: string })[] = [
   { short: 'Walking at a glacial pace across a busy pedestrian crossing.', category: 'CROSSWALK', dispute: 'Walking at a glacial pace across a busy pedestrian crossing.', defendant: 'The leisurely pedestrian', plaintiff: 'The person waiting at the crossing', defense: 'I was enjoying the fresh air.', plaintiffArgument: 'The signal had already changed twice.' },
 ];
 const blank: CaseInput = { dispute: '', defendant: '', plaintiff: '', defense: '', plaintiffArgument: '' };
+
+function isRuling(value: unknown): value is Ruling {
+  if (typeof value !== 'object' || value === null) return false;
+  const candidate = value as Partial<Ruling>;
+  return ['id', 'docket', 'dispute', 'defendant', 'plaintiff', 'defense', 'plaintiffArgument', 'charge', 'punishment', 'finalWord', 'timestamp']
+    .every((key) => typeof candidate[key as keyof Ruling] === 'string')
+    && verdicts.includes(candidate.verdict as VerdictName)
+    && Array.isArray(candidate.reasoning)
+    && candidate.reasoning.every((sentence) => typeof sentence === 'string');
+}
+
+function loadArchive(): Ruling[] {
+  try {
+    const saved = window.localStorage.getItem(archiveStorageKey);
+    if (!saved) return [];
+    const parsed: unknown = JSON.parse(saved);
+    return Array.isArray(parsed) ? parsed.filter(isRuling).slice(0, 5) : [];
+  } catch {
+    return [];
+  }
+}
 
 function pick<T>(items: T[], exclude?: T) {
   const available = exclude === undefined ? items : items.filter((item) => item !== exclude);
@@ -303,7 +325,7 @@ function Judge({ verdict, deliberating = false }: { verdict?: VerdictName; delib
 function App() {
   const [form, setForm] = useState<CaseInput>(blank);
   const [ruling, setRuling] = useState<Ruling | null>(null);
-  const [archive, setArchive] = useState<Ruling[]>([]);
+  const [archive, setArchive] = useState<Ruling[]>(loadArchive);
   const [busy, setBusy] = useState(false);
   const [sound, setSound] = useState(true);
   const [toast, setToast] = useState('');
@@ -315,6 +337,13 @@ function App() {
   const docket = getDocket();
 
   useEffect(() => () => window.clearTimeout(timeoutRef.current), []);
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(archiveStorageKey, JSON.stringify(archive));
+    } catch {
+      // Keep the archive usable in this session if browser storage is unavailable.
+    }
+  }, [archive]);
   const notify = (message: string) => {
     setToast(message);
     window.setTimeout(() => setToast(''), 2800);
@@ -548,7 +577,7 @@ function App() {
                 <div className="form-row"><label><span>THE DEFENSE <i>— optional</i></span><textarea className="field" rows={2} value={form.defense} onChange={(e) => updateForm('defense', e.target.value)} placeholder="“It was already open…”" maxLength={220} data-testid="input-defense"/></label><label><span>THE PLAINTIFF’S ARGUMENT <i>— optional</i></span><textarea className="field" rows={2} value={form.plaintiffArgument} onChange={(e) => updateForm('plaintiffArgument', e.target.value)} placeholder="“I have receipts. Actual receipts.”" maxLength={220} data-testid="input-plaintiff-argument"/></label></div>
                 <div className="summon-row"><button className="action-button summon-button" type="submit" disabled={busy} data-testid="button-summon"><Scale size={20}/> SUMMON THE JUDGE <Gavel size={18}/></button><span className="summon-caption">1.2 seconds to justice<br/><small>Absolutely no legal standing.</small></span></div>
               </form>
-              <div className="privacy-note"><Info size={15}/><span>Your case stays right here in this browser session. No lawyers, no servers, no actual consequences.</span></div>
+              <div className="privacy-note"><Info size={15}/><span>Filed rulings stay right here in this browser. No lawyers, no servers, no actual consequences.</span></div>
             </div>
             <aside className="archive-column">
               <div className="docket-card paper-card">

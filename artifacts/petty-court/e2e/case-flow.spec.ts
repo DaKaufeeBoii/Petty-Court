@@ -41,6 +41,7 @@ test('a user can file, appeal, review, copy, and restart a petty case', async ({
   expect(appealedVerdict).not.toBe(firstVerdict);
 
   await expect(page.getByTestId('button-archive-0')).toBeVisible();
+  await expect.poll(() => page.evaluate(() => window.localStorage.getItem('petty-court:rulings:v1'))).toContain('Putting the empty milk carton back in the fridge.');
   await expect(page.getByTestId('button-archive-1')).toBeVisible();
   await page.getByTestId('button-archive-1').click();
   await expect(verdict).toHaveText(firstVerdict);
@@ -70,4 +71,9 @@ test('a user can file, appeal, review, copy, and restart a petty case', async ({
   await expect(defendant).toHaveValue('');
   await expect(plaintiff).toHaveValue('');
   await expect(page.getByTestId('button-archive-0')).toBeVisible();
+  await page.reload();
+  await expect(page.getByTestId('button-archive-0')).toBeVisible();
+  await expect(page.getByTestId('button-archive-1')).toBeVisible();
+  await page.getByTestId('button-archive-0').click();
+  await expect(page.locator('.ruling-title h2')).toHaveText('Putting the empty milk carton back in the fridge.');
 });
