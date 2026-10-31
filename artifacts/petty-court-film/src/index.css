@@ -1,0 +1,198 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@import 'tailwindcss';
+
+:root {
+  --paper: #efe5ce;
+  --paper-light: #f6efdf;
+  --paper-shadow: #d9c9a8;
+  --ink: #33231f;
+  --ink-soft: #735e4c;
+  --oxblood: #6b2034;
+  --oxblood-deep: #471827;
+  --brass: #b48b4d;
+  --brass-light: #dec27f;
+  --sage: #65715a;
+  --font-display: 'DM Serif Display', Georgia, serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+}
+
+@theme inline {
+  --color-primary: var(--oxblood);
+  --color-secondary: var(--ink-soft);
+  --color-accent: var(--brass);
+  --color-bg-light: var(--paper);
+  --color-bg-dark: var(--oxblood-deep);
+  --color-bg-muted: var(--paper-shadow);
+  --color-text-primary: var(--ink);
+  --color-text-secondary: var(--ink-soft);
+  --color-text-muted: #9c896c;
+  --color-text-inverse: var(--paper-light);
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
+}
+
+* { box-sizing: border-box; }
+html, body, #root { margin: 0; min-height: 100%; overflow: hidden; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.film-canvas { isolation: isolate; }
+.film-grain {
+  position: absolute; inset: 0; z-index: 80; pointer-events: none; opacity: .13;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.88' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.24'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
+}
+.film-vignette { position:absolute; inset:0; z-index:79; pointer-events:none; box-shadow:inset 0 0 12vmin rgba(49,25,24,.13); }
+.shot { position:absolute; inset:0; overflow:hidden; transform-style:preserve-3d; }
+.paper-field {
+  position:absolute; inset:0;
+  background:
+    radial-gradient(ellipse at 51% 43%, rgba(255,252,240,.78), transparent 58%),
+    repeating-linear-gradient(0deg, rgba(113,77,42,.027) 0 1px, transparent 1px 3px),
+    var(--paper);
+}
+.shot-kicker,.edge-caption {
+  position:absolute; z-index:3; font:600 1.6vmin var(--font-mono); letter-spacing:.19em;
+  color:#8a7047;
+}
+.shot-kicker { top:6.1%; left:6.2%; }
+.edge-caption { right:6.2%; bottom:5.7%; writing-mode:vertical-rl; font-size:1.35vmin; }
+.ink-wash { position:absolute; border-radius:50%; background:var(--oxblood); opacity:.08; filter:blur(1px); }
+.wash-one { width:32vmin; height:32vmin; right:5%; top:-16%; }
+.gavel-macro { position:absolute; left:39%; top:31%; width:54vmin; height:40vmin; z-index:2; transform-origin:54% 60%; }
+.gavel-macro svg { width:100%; height:100%; overflow:visible; }
+.impact-ring { position:absolute; z-index:1; left:44%; top:39%; width:46vmin; height:46vmin; border:1px solid rgba(166,125,56,.76); border-radius:50%; transform-origin:center; }
+.exhibit-word { position:absolute; z-index:4; display:flex; align-items:baseline; gap:1.1vmin; left:6.2%; top:18%; color:var(--oxblood); font:900 20.5vmin/.82 var(--font-body); letter-spacing:-.085em; }
+.exhibit-word span { text-shadow:1px 2px rgba(70,34,27,.09); }
+.exhibit-word b { display:grid; place-items:center; width:8.6vmin; height:9vmin; border:2px solid var(--brass); color:var(--brass); font:italic 5.5vmin var(--font-display); letter-spacing:0; }
+.evidence-tag {
+  position:absolute; z-index:5; left:7.5%; bottom:17%; width:43vmin; min-height:15vmin; padding:2vmin 2.4vmin;
+  display:flex; flex-direction:column; justify-content:center; gap:.85vmin; color:var(--ink);
+  background:var(--paper-light); border:1px solid #c8b58b;
+  box-shadow:0 1.2vmin 3vmin rgba(64,42,27,.14), inset 0 0 0 .7vmin rgba(181,145,72,.1);
+}
+.evidence-tag::after { content:""; position:absolute; left:0; right:0; bottom:1.5vmin; border-bottom:1px solid rgba(128,87,48,.28); }
+.evidence-tag span,.evidence-column>span,.defense-note>span { color:#997c49; font:600 1.35vmin var(--font-mono); letter-spacing:.13em; }
+.evidence-tag strong { font:2.55vmin/1.14 var(--font-display); letter-spacing:.025em; }
+.tiny-carton { position:absolute; right:2.4vmin; top:2vmin; width:4.2vmin; height:5.7vmin; border:1px solid var(--oxblood); background:linear-gradient(110deg,#f0e4ca 0 50%,#cbb78a 51%); transform:rotate(6deg); }
+.tiny-carton i { position:absolute; left:30%; width:40%; height:1px; background:var(--oxblood); }
+.tiny-carton i:nth-child(1){top:34%}.tiny-carton i:nth-child(2){top:48%}.tiny-carton i:nth-child(3){top:62%}
+.parties-label { position:absolute; z-index:4; right:8%; top:30%; color:#715b43; font:2.2vmin var(--font-mono); letter-spacing:.09em; }
+.parties-label em { color:var(--brass); font:italic 3vmin var(--font-display); }
+.opening-seal { position:absolute; z-index:7; right:10%; bottom:11%; width:20vmin; height:20vmin; display:grid; place-items:center; }
+.opening-seal svg { position:absolute; inset:0; width:100%; height:100%; }
+.opening-seal span { position:relative; color:var(--paper-light); text-align:center; font:600 1.25vmin/1.4 var(--font-mono); letter-spacing:.12em; }
+
+/* Shot 02: paper unfolds into a theatrical, deliberately overbuilt court. */
+.shot-two { background:#e9ddc1; }
+.court-backdrop { position:absolute; inset:0; background:radial-gradient(ellipse at 50% 58%, #f6efdE 0 34%,#e6d7b7 75%); }
+.court-curtain { position:absolute; top:0; bottom:0; width:18%; background:linear-gradient(90deg,#4c1828,#792c40 45%,#521a2c); box-shadow:inset -1.2vmin 0 2vmin rgba(25,10,12,.3); }
+.curtain-left { left:0; clip-path:polygon(0 0,100% 0,82% 100%,0 100%); }
+.curtain-right { right:0; transform:scaleX(-1); clip-path:polygon(0 0,100% 0,82% 100%,0 100%); }
+.court-arch { position:absolute; width:68%; height:82%; left:16%; bottom:-18%; border:1.1vmin solid rgba(179,141,74,.5); border-bottom:0; border-radius:50% 50% 0 0; }
+.bench { position:absolute; width:62%; height:4vmin; left:19%; bottom:19%; background:linear-gradient(#613121,#381c17); border:1px solid #b58d51; }
+.bench-front { position:absolute; width:58%; height:13%; left:21%; bottom:7%; background:linear-gradient(90deg,#542331,#76283d 50%,#4a1b2a); border-top:1.1vmin solid #b58a4b; box-shadow:0 2vmin 2vmin rgba(40,20,15,.14); }
+.court-seal { position:absolute; width:12vmin; height:12vmin; left:calc(50% - 6vmin); top:24%; opacity:.28; }
+.court-seal svg { width:100%; height:100%; }
+.tiny-judge { position:absolute; z-index:2; left:calc(50% - 9vmin); bottom:15%; width:18vmin; height:18vmin; }
+.tiny-judge svg { width:100%; height:100%; }
+.court-heading { position:absolute; z-index:3; top:6.7%; width:100%; text-align:center; color:var(--oxblood); }
+.court-heading span { display:block; font:600 1.65vmin var(--font-mono); letter-spacing:.21em; color:#9d7c43; }
+.court-heading strong { display:block; font:italic 8.4vmin/.98 var(--font-display); letter-spacing:-.055em; }
+.court-heading i { display:block; margin-top:1.1vmin; color:#78664c; font:600 1.7vmin var(--font-mono); letter-spacing:.19em; font-style:normal; }
+.party-card { position:absolute; z-index:4; top:42%; width:25vmin; min-height:17vmin; padding:1.8vmin; display:flex; flex-direction:column; justify-content:space-between; color:var(--ink); background:#f5eedc; border:1px solid #baa16e; box-shadow:0 1vmin 2.4vmin rgba(54,31,20,.16); }
+.party-card small { color:#9a7845; font:600 1.3vmin var(--font-mono); letter-spacing:.16em; }
+.party-card b { font:2.5vmin/1.05 var(--font-display); }
+.party-card span { color:#9e8a6a; font:1.15vmin var(--font-mono); letter-spacing:.1em; }
+.plaintiff-card { left:10%; transform-origin:bottom right; }
+.defendant-card { right:10%; text-align:right; transform-origin:bottom left; }
+.court-balance { position:absolute; z-index:2; width:31%; height:1px; left:34.5%; top:62%; background:var(--brass); transform-origin:left; }
+.court-disclaimer { position:absolute; z-index:4; bottom:4.5%; width:100%; text-align:center; color:#d5bd88; font:600 1.35vmin var(--font-mono); letter-spacing:.2em; }
+.folding-docket { position:absolute; z-index:8; left:35%; top:42%; width:30%; height:23%; background:#f0e5cc; border:2px solid var(--brass); box-shadow:0 2vmin 4vmin rgba(40,20,20,.32); display:flex; align-items:center; justify-content:center; gap:1.5vmin; color:#725331; font:600 2.2vmin var(--font-mono); }
+.folding-docket b { color:var(--oxblood); font:italic 4vmin var(--font-display); }
+
+/* Shot 03: forensic desk-top evidence. */
+.shot-three { background:#d9c9a8; }
+.statute-page { position:absolute; inset:5.4% 8%; padding:4.2vmin 5vmin; background:var(--paper-light); box-shadow:0 1.6vmin 5vmin rgba(57,34,20,.23); transform:rotate(-1deg); overflow:hidden; }
+.statute-page::before { content:""; position:absolute; inset:1.4vmin; border:1px solid rgba(169,133,69,.44); pointer-events:none; }
+.page-topline { position:absolute; top:4%; left:5%; right:5%; display:flex; justify-content:space-between; color:#937744; font:600 1.25vmin var(--font-mono); letter-spacing:.15em; }
+.page-index { position:absolute; left:5.3%; top:21%; color:#a18451; font:1.3vmin/1.6 var(--font-mono); }
+.page-index b { display:block; margin-top:1vmin; color:#9a8060; font:italic 2.15vmin/1.1 var(--font-display); }
+.page-rule { position:absolute; top:19%; bottom:19%; left:16%; width:1px; background:#cdb88e; }
+.charge-copy { position:absolute; left:21%; top:18%; width:50%; }
+.charge-copy span,.citation-copy span,.law-verdict { color:#9d7b42; font:600 1.5vmin var(--font-mono); letter-spacing:.18em; }
+.charge-copy h2 { margin:1.5vmin 0 0; color:var(--oxblood); font:italic 8.2vmin/.95 var(--font-display); letter-spacing:-.035em; }
+.charge-copy h2 i { color:#3c2a23; font-size:6.25vmin; font-weight:400; }
+.citation-copy { position:absolute; left:21%; top:49%; color:#514136; }
+.citation-copy strong { display:block; margin-top:.6vmin; font:600 2.1vmin/1.25 var(--font-mono); letter-spacing:.03em; }
+.evidence-column { position:absolute; right:8%; top:28%; width:22%; display:flex; flex-direction:column; align-items:center; gap:1.3vmin; text-align:center; }
+.magnifier { position:relative; width:19vmin; height:19vmin; border:1.1vmin solid #aa854b; border-radius:50%; background:radial-gradient(circle at 35% 25%,#fffef0,#c9b686); box-shadow:0 1vmin 2.2vmin rgba(51,29,19,.2), inset 0 0 0 1px #f5e3b4; display:grid; place-items:center; }
+.magnifier::after { content:""; position:absolute; width:2.5vmin; height:10vmin; background:linear-gradient(90deg,#79573a,#b99153); border:1px solid #66432e; transform:translate(7vmin,7vmin) rotate(-42deg); transform-origin:top center; z-index:-1; }
+.drop { width:7.2vmin; height:7.2vmin; display:grid; place-content:center; border-radius:50%; color:var(--oxblood); background:rgba(235,220,183,.75); box-shadow:inset 0 0 0 1px #ae925b; font:italic 3.2vmin var(--font-display); }
+.drop small { font:600 .85vmin var(--font-mono); letter-spacing:.12em; }
+.evidence-column>b { color:#664d33; font:2.1vmin var(--font-display); }
+.defense-note { position:absolute; left:21%; bottom:16%; width:34%; min-height:12%; padding:1.4vmin 1.7vmin; background:#eee3cb; border-left:.7vmin solid #a27b45; box-shadow:0 .5vmin 1vmin rgba(60,35,20,.09); }
+.defense-note p { margin:.6vmin 0 0; color:#514136; font:italic 2.1vmin/1.2 var(--font-display); }
+.defense-note b { position:absolute; right:-9%; bottom:1%; color:#842840; border:2px solid #842840; padding:.5vmin .7vmin; font:600 1.3vmin var(--font-mono); letter-spacing:.1em; transform:rotate(-7deg); }
+.red-ruling { position:absolute; z-index:5; left:47%; top:58%; color:#8a283a; border:3px double #8a283a; padding:.7vmin 1.5vmin; font:600 1.7vmin var(--font-mono); letter-spacing:.16em; }
+.law-verdict { position:absolute; left:21%; bottom:6.5%; color:#7a2135; font-size:1.6vmin; }
+.page-gavel { position:absolute; z-index:5; right:3.5%; bottom:-2%; width:22vmin; height:17vmin; }
+.page-gavel svg { width:100%; height:100%; }
+.red-aperture { position:absolute; z-index:10; width:22vmin; height:22vmin; left:calc(50% - 11vmin); top:calc(50% - 11vmin); border-radius:50%; background:#7b2439; pointer-events:none; }
+
+/* Shot 04: the familiar judge, now monumental. */
+.shot-four { background:var(--oxblood-deep); }
+.verdict-field { position:absolute; inset:0; background:radial-gradient(ellipse at 50% 43%,#832b40 0,#6a2035 48%,#471827 100%); overflow:hidden; }
+.verdict-orbit { position:absolute; left:50%; top:45%; width:64vmin; height:64vmin; border:1px solid rgba(222,194,127,.45); border-radius:50%; transform:translate(-50%,-50%); }
+.orbit-b { width:78vmin; height:78vmin; border-color:rgba(222,194,127,.16); border-style:dashed; }
+.verdict-kicker { position:absolute; z-index:2; top:6%; width:100%; text-align:center; color:var(--brass-light); font:600 1.5vmin var(--font-mono); letter-spacing:.25em; }
+.judge-hero { position:absolute; z-index:2; width:52vmin; height:52vmin; left:calc(50% - 26vmin); top:7%; filter:drop-shadow(0 2vmin 1.5vmin rgba(31,8,14,.22)); }
+.judge-hero svg { width:100%; height:100%; }
+.judge-nameplate { position:absolute; z-index:4; left:50%; top:68%; width:47vmin; min-height:7vmin; padding:1vmin 1.5vmin; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; justify-content:center; border:1px solid var(--brass-light); background:#f0e5cc; box-shadow:0 .8vmin 1.8vmin rgba(26,9,13,.2); transform-origin:center; }
+.judge-nameplate span { color:var(--oxblood); font:italic 3.2vmin var(--font-display); letter-spacing:.04em; }
+.judge-nameplate small { color:#927747; font:600 1.05vmin var(--font-mono); letter-spacing:.16em; }
+.stamp-arm { position:absolute; z-index:5; right:17%; top:1%; width:14vmin; height:30vmin; transform-origin:50% 45%; }
+.stamp-handle { position:absolute; left:37%; top:0; width:26%; height:18vmin; border-radius:2vmin; background:linear-gradient(90deg,#664029,#c59453 40%,#795031); box-shadow:inset 1px 0 #e0bd78; }
+.stamp-head { position:absolute; width:100%; height:11vmin; left:0; bottom:0; border-radius:50%; background:#a57842; border:.7vmin solid #513221; box-shadow:0 .8vmin 1vmin rgba(0,0,0,.2); }
+.stamp-head svg { width:100%; height:100%; opacity:.65; }
+.verdict-stamp { position:absolute; z-index:6; left:51%; top:38%; width:17vmin; height:17vmin; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.5vmin; border:4px double #90283d; border-radius:50%; color:#90283d; background:rgba(246,235,211,.93); box-shadow:0 1vmin 2vmin rgba(36,10,18,.22); }
+.verdict-stamp span { font:600 .9vmin var(--font-mono); letter-spacing:.15em; }
+.verdict-stamp b { font:italic 3.4vmin/.9 var(--font-display); }
+.sentence-ribbon { position:absolute; z-index:3; left:13%; bottom:8%; width:53%; min-height:12%; padding:1.3vmin 2vmin; display:flex; flex-direction:column; justify-content:center; background:#f1e7d1; border-left:.7vmin solid var(--brass-light); box-shadow:0 1vmin 2.5vmin rgba(23,8,12,.22); }
+.sentence-ribbon span { color:#a17d44; font:600 1.15vmin var(--font-mono); letter-spacing:.17em; }
+.sentence-ribbon b { margin-top:.5vmin; color:#522334; font:italic 2.5vmin/1.12 var(--font-display); }
+.last-word { position:absolute; z-index:3; right:5.5%; bottom:10%; width:27%; color:#f3e5c7; font:600 1.65vmin/1.55 var(--font-mono); letter-spacing:.04em; }
+.last-word i { color:#d9bd7a; font:italic 2.25vmin var(--font-display); letter-spacing:0; }
+.ink-expansion { position:absolute; z-index:8; left:50%; top:49%; width:30vmin; height:30vmin; border-radius:50%; background:#83253b; transform:translate(-50%,-50%); }
+
+/* Shot 05: the lockup is quieter and flatter than the hero. */
+.shot-five { color:var(--paper-light); background:#6b2034; }
+.finale-border { position:absolute; inset:4.3%; border:1px solid rgba(221,194,127,.6); }
+.finale-border::before,.finale-border::after { content:""; position:absolute; width:2vmin; height:2vmin; border:1px solid var(--brass-light); border-radius:50%; top:50%; }
+.finale-border::before { left:-1vmin; }.finale-border::after { right:-1vmin; }
+.finale-small { position:absolute; left:9.4%; top:17%; color:var(--brass-light); font:600 2.1vmin var(--font-mono); letter-spacing:.2em; }
+.finale-large { position:absolute; left:8.7%; top:27%; color:var(--paper-light); font:italic 15vmin/.82 var(--font-display); letter-spacing:-.055em; }
+.finale-large i { color:#d5b56f; font-weight:400; }
+.finale-seal { position:absolute; right:13%; top:19%; width:31vmin; height:31vmin; display:grid; place-items:center; }
+.finale-seal svg { position:absolute; width:100%; height:100%; }
+.finale-seal span { position:relative; color:var(--paper-light); text-align:center; font:600 1.8vmin/1.4 var(--font-mono); letter-spacing:.18em; }
+.finale-slogan { position:absolute; left:9.4%; top:69%; width:67%; color:#f2e4c7; font:italic 3.2vmin var(--font-display); }
+.finale-process { position:absolute; left:9.4%; bottom:13%; display:flex; align-items:center; gap:1.4vmin; color:#d9bd7a; font:600 1.25vmin var(--font-mono); letter-spacing:.1em; }
+.finale-process i { width:4vmin; height:1px; background:var(--brass); }
+.finale-footer { position:absolute; right:9.4%; bottom:6.6%; color:rgba(244,232,208,.62); font:600 1.05vmin var(--font-mono); letter-spacing:.16em; }
+.finale-footer b { color:var(--brass-light); padding:0 .6em; }
+.finale-light { position:absolute; z-index:5; top:0; bottom:0; width:15%; background:linear-gradient(90deg,transparent,rgba(246,228,184,.1),transparent); transform:skewX(-19deg); pointer-events:none; }
+.loop-seal { position:absolute; z-index:9; width:24vmin; height:24vmin; left:calc(50% - 12vmin); top:calc(50% - 12vmin); }
+.loop-seal svg { width:100%; height:100%; }
+
+audio { display:none; }
+@media (prefers-reduced-motion: reduce) {
+  .film-grain { opacity:.07; }
+}

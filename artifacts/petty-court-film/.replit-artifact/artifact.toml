@@ -1,0 +1,29 @@
+kind = "video"
+previewPath = "/petty-court-film/"
+videoAspectRatio = "16:9"
+title = "Petty Court — Animated Promo"
+description = "A short looping animated promo introducing Petty Court, Judge Reginald P. Pettiness, and the app's dramatic verdicts for tiny everyday disputes."
+version = "1.0.0"
+id = "artifacts/petty-court-film"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/petty-court-film/" ]
+localPort = 21799
+
+[services.development]
+run = "pnpm --filter @workspace/petty-court-film run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/petty-court-film", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/petty-court-film/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21799"
+BASE_PATH = "/petty-court-film/"
