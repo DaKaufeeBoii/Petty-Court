@@ -1,0 +1,74 @@
+Build a complete, polished, self-contained single-page web app called "Petty Court – The People's Court of Ridiculous Arguments".
+
+### Stack & Architecture
+- Framework: React (Vite) + Tailwind CSS + Lucide-react for icons + canvas-confetti.
+- Architecture: 100% client-side (no database, no backend API keys, zero external image/audio URLs that could 404).
+- Audio: Use the HTML5 Web Audio API to synthesize a realistic wooden gavel "THWACK / SLAM" sound and stamp sound on click without external audio assets.
+
+### Aesthetics & Tone ("Indie Cartoon Courtroom")
+- Visuals: Warm storybook / cartoon courtroom aesthetic.
+- Color Palette: 
+  - Background: Warm vintage cream/parchment (`#FDF8EE` / `#F4EBD9`)
+  - Primary accents: Rich judicial burgundy (`#6B1D2F`), antique gold (`#D4AF37`), dark mahogany wood (`#3B2219`), ink black (`#1F1D1A`).
+- Typography: Bold, chunky, expressive serif or slab-serif headings (like `font-serif` / Playfair / Fraunces style) paired with clean, readable body copy.
+- Custom SVG Judge: Create an expressive, inline animated SVG cartoon judge character ("Judge Reginald P. Pettiness") at the top bench with swappable expressions based on the verdict (e.g., Stern, Disgusted, Laughing, Dumbfounded).
+- Visual Effects:
+  - Screen shake effect when the gavel slams.
+  - Dramatic rubber-stamp slamming animation ("GUILTY AS CHARGED" in bold red, or "CASE DISMISSED WITH PREJUDICE" in judicial blue).
+  - Falling confetti or dust particles when a verdict lands.
+
+---
+
+### Core Views & Features
+
+#### 1. Courtroom Header & Hero
+- Title: "PETTY COURT" with a subtitle banner: *"Justice for things that absolutely do not matter."*
+- Docket Case Counter (e.g. "Case #74,821 of Today").
+- Quick-Start Sample Disputes carousel/chips that auto-fill the form with 1 click:
+  - *"Putting the empty milk carton back in the fridge."*
+  - *"Leaving 2 seconds on the microwave and not pressing clear."*
+  - *"Stealing the blanket at 3:14 AM and rolling into a human burrito."*
+  - *"Saying 'I'm fine with anything for dinner' then vetoing 5 options."*
+  - *"Walking at a glacial pace across a busy pedestrian crossing."*
+
+#### 2. The Case Filing Form (Interactive & Animated)
+- Inputs:
+  - Dispute summary (Required, e.g. "Who owns the armrest between seats?").
+  - "The Accused / Defendant" & "The Victim / Plaintiff" names or labels (e.g., "Me" vs "My Roommate Dave").
+  - Optional: Argument for Plaintiff vs. Defense's excuse.
+- A prominent, juicy, animated button: **"⚖️ SUMMON THE JUDGE & BANG GAVEL"** with hover bounce.
+
+#### 3. The Grand Verdict Screen (Animated Transition)
+When the user submits:
+1. Play gavel strike sound via Web Audio API + brief camera shake.
+2. Show a 1.2-second dramatic deliberation banner (e.g., *"Consulting the Sacred Law of Minor Inconveniences..."*).
+3. Reveal the Official Petty Court Decree:
+   - **Official Case Docket Number** (randomized, e.g., `#PETTY-2026-9042-BF`).
+   - **Formal Legal Charge** (e.g., *"First-Degree Microwave Neglect with Malice Aforethought"*).
+   - **The Verdict**: Massive stamped badge (`GUILTY`, `ABSOLUTELY GUILTY`, `BOTH ARE DISQUALIFIED`, or `ACQUITTED (Barely)`).
+   - **Judge's Reasoning**: 2-3 sentences of hilarious, ultra-formal, dramatic legal logic applying constitutional-level scrutiny to tiny everyday gripes.
+   - **The Absurd Punishment / Sentence**: Ridiculous restitution (e.g., *"The defendant is sentenced to 72 hours of mandatory silence during television cliffhangers and must peel all future oranges for the plaintiff."*).
+   - **Judge's Final Word**: A spicy one-liner from Judge Reginald.
+
+#### 4. Post-Verdict Action Deck
+- **"Appeal to Petty Supreme Court" (Re-trial)**: Re-evaluates the case with a new gavel slam and generates a wildly different conflicting verdict.
+- **"Copy Official Court Transcript"**: Copies a formatted ASCII/emoji legal brief to clipboard with toast notification (e.g. "📋 Copied! Ready to text your roommate").
+- **"File a New Dispute"**: Resets to the bench smoothly.
+- **"Petty Case Archive"**: A drawer or bottom section that saves the last 5 verdicts from this session in local state so the user can review their past trials.
+
+---
+
+### Procedural Verdict Generator Engine (No External APIs)
+Implement a robust, rich in-code generation matrix combining:
+- 15+ absurd formal legal statutes.
+- 20+ judicial reasonings with slot substitution (plaintiff, defendant, dispute).
+- 25+ hyper-specific funny punishments (e.g., *"Must untangle 4 pairs of wired earbuds before bed"*, *"Forfeits right to pick the car AUX cord until 2029"*).
+- Include smart fallback logic so it makes sense whether the user entered detailed arguments or just a single line.
+
+---
+
+### Implementation Instructions
+1. Build the complete application in a single unified, responsive layout.
+2. Ensure mobile-friendly touch targets, responsive grid/flexbox, and zero overflow bugs.
+3. Test all buttons (sample chips, summon, sound toggling, appeal, copy to clipboard, local history).
+4. Run the development server and verify there are no console warnings or runtime exceptions.

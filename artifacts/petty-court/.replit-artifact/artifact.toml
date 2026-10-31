@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Petty Court"
+description = "A playful, self-contained courtroom app that turns everyday disagreements into dramatic, shareable legal verdicts."
+version = "1.0.0"
+id = "artifacts/petty-court"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 26035
+
+[services.development]
+run = "pnpm --filter @workspace/petty-court run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/petty-court", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/petty-court/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "26035"
+BASE_PATH = "/"
