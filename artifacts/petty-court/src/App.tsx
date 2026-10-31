@@ -277,6 +277,23 @@ function drawRulingCard(context: CanvasRenderingContext2D, ruling: Ruling) {
   context.lineTo(948, y);
   context.stroke();
   y += 48;
+
+  context.textAlign = 'center';
+  context.fillStyle = '#916b31';
+  context.font = '500 18px "DM Mono", monospace';
+  context.fillText('JUDGE REGINALD’S FINAL WORD', center, y);
+  y += 42;
+  context.fillStyle = '#582034';
+  context.font = 'italic 500 31px Fraunces, Georgia, serif';
+  y = drawWrappedText(context, `“${ruling.finalWord}”`, center, y, 780, 42);
+
+  y += 20;
+  context.strokeStyle = '#c8b18a';
+  context.beginPath();
+  context.moveTo(132, y);
+  context.lineTo(948, y);
+  context.stroke();
+  y += 48;
   context.textAlign = 'center';
   context.fillStyle = '#74243a';
   context.font = '600 23px Fraunces, Georgia, serif';

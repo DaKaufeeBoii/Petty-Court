@@ -3,6 +3,14 @@ import { readFile } from 'node:fs/promises';
 
 test('a user can file, appeal, review, copy, and restart a petty case', async ({ page, context }) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await page.addInitScript(() => {
+    Object.assign(window, { __rulingCanvasText: [] as string[] });
+    const originalFillText = CanvasRenderingContext2D.prototype.fillText;
+    CanvasRenderingContext2D.prototype.fillText = function (text, x, y, maxWidth) {
+      (window as Window & { __rulingCanvasText: string[] }).__rulingCanvasText.push(text);
+      return originalFillText.call(this, text, x, y, maxWidth);
+    };
+  });
   await page.goto('/');
 
   const dispute = page.getByTestId('input-dispute');
@@ -57,6 +65,10 @@ test('a user can file, appeal, review, copy, and restart a petty case', async ({
   expect([...imageBytes.subarray(0, 8)]).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
   expect(imageBytes.readUInt32BE(16)).toBe(1080);
   expect(imageBytes.readUInt32BE(20)).toBeGreaterThan(1200);
+  const judgeFinalWord = (await page.locator('.judge-last-word p').innerText()).replace(/[“”]/g, '');
+  const renderedText = (await page.evaluate(() => (window as Window & { __rulingCanvasText: string[] }).__rulingCanvasText)).join(' ');
+  expect(renderedText).toContain('JUDGE REGINALD’S FINAL WORD');
+  expect(renderedText).toContain(judgeFinalWord);
   await expect(page.getByRole('status')).toContainText('Ruling image downloaded.');
 
   await page.getByTestId('button-copy-transcript').click();
