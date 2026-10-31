@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import confetti from 'canvas-confetti';
 import {
   ArrowLeft, ArrowRight, BookOpen, Check, Clipboard,
-  Gavel, History, Info, RotateCcw, Scale, Sparkles, Volume2, VolumeX,
+  Gavel, History, Info, RotateCcw, Scale, ScrollText, Sparkles, Volume2, VolumeX,
   X,
 } from 'lucide-react';
 
@@ -131,11 +131,19 @@ function Judge({ verdict, deliberating = false }: { verdict?: VerdictName; delib
       <path d="M108 179l13 17 13-17-13-10z" fill="#b4914c"/>
       <path d="M94 120c0 23 12 39 27 39s27-16 27-39v-13H94z" fill="#d8aa7b" stroke="#6d4c32" strokeWidth="2"/>
       <path d="M83 77c2-26 19-42 39-42s37 16 39 42l-5 34c-2 16-18 29-34 29s-32-13-34-29z" fill="#e9bc8c" stroke="#725137" strokeWidth="3"/>
-      <path d="M77 79c-9-25 7-58 44-60 35-2 51 24 43 60l-10-12-8-22c-19 10-42 13-59 7l-5 24z" fill="#382a24" stroke="#241d1a" strokeWidth="3"/>
-      <path d="M82 68c-7 13-5 25 1 31l9-18M158 66c7 12 5 25-1 32l-9-19" fill="#382a24"/>
+      <path d="M76 81c-12-30 7-62 44-64 37-2 56 27 44 64l-12-13-8-24c-18 10-42 13-59 7l-5 26z" fill="#f4ead5" stroke="#49362d" strokeWidth="3"/>
+      <path d="M82 70c-9 13-7 28 2 34l11-22M158 68c9 13 7 28-2 35l-11-22" fill="#f4ead5" stroke="#49362d" strokeWidth="2"/>
+      <path d="M91 47c6-11 16-16 28-15 13-1 24 5 31 16-17 8-43 10-59-1z" fill="#fff7e6" stroke="#c9b997" strokeWidth="2"/>
+      <g fill="#f8efd9" stroke="#c9b997" strokeWidth="1.5">
+        <circle cx="82" cy="57" r="10"/><circle cx="92" cy="42" r="10"/><circle cx="107" cy="32" r="10"/>
+        <circle cx="124" cy="31" r="10"/><circle cx="140" cy="38" r="10"/><circle cx="155" cy="52" r="10"/>
+        <circle cx="82" cy="82" r="10"/><circle cx="158" cy="82" r="10"/>
+      </g>
       <path d={stern ? 'M99 91q8-5 16 0' : baffled ? 'M98 89q9 3 16-1' : 'M98 91q8-2 16 1'} fill="none" stroke="#4b3024" strokeWidth="3" strokeLinecap="round"/>
       <path d={stern ? 'M126 91q8-5 16 0' : baffled ? 'M126 88q9 4 16 0' : 'M126 92q8-2 16-1'} fill="none" stroke="#4b3024" strokeWidth="3" strokeLinecap="round"/>
       <ellipse cx="107" cy="100" rx="3" ry="4" fill="#34251e"/><ellipse cx="135" cy="100" rx="3" ry="4" fill="#34251e"/>
+      <circle cx="107" cy="100" r="10" fill="none" stroke="#8a6d3a" strokeWidth="2"/><circle cx="135" cy="100" r="10" fill="none" stroke="#8a6d3a" strokeWidth="2"/>
+      <path d="M117 99h8" stroke="#8a6d3a" strokeWidth="2"/>
       <path d={stern ? 'M112 122q9-7 18 0' : baffled ? 'M111 123q10-8 20 0' : relieved ? 'M111 117q10 13 20 0' : 'M112 119q9 5 18 0'} fill="none" stroke="#7d3036" strokeWidth="3" strokeLinecap="round"/>
       <path d="M102 105q19 10 39 0" fill="none" stroke="#bb8067" strokeWidth="2"/>
       <path d="M113 109h16" stroke="#a8894a" strokeWidth="2"/>
@@ -238,7 +246,7 @@ function App() {
   };
   const copyTranscript = async () => {
     if (!ruling) return;
-    const text = `⚖️ PETTY COURT — DOCKET ${ruling.docket}\n\nIN THE MATTER OF: ${ruling.dispute}\n${ruling.plaintiff} v. ${ruling.defendant}\n\nCHARGE: ${ruling.charge}\nVERDICT: ${ruling.verdict}\n\n${ruling.reasoning.join('\n\n')}\n\nSENTENCE: ${ruling.punishment}\n\nJUDGE REGINALD P. PETTINESS: “${ruling.finalWord}”\n\nJustice for things that absolutely do not matter.`;
+    const text = `PETTY COURT — DOCKET ${ruling.docket}\n\nIN THE MATTER OF: ${ruling.dispute}\n${ruling.plaintiff} v. ${ruling.defendant}\n\nCHARGE: ${ruling.charge}\nVERDICT: ${ruling.verdict}\n\n${ruling.reasoning.join('\n\n')}\n\nSENTENCE: ${ruling.punishment}\n\nJUDGE REGINALD P. PETTINESS: “${ruling.finalWord}”\n\nJustice for things that absolutely do not matter.`;
     try {
       if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable');
       await navigator.clipboard.writeText(text); notify('Transcript copied. The group chat is now in session.');
@@ -255,51 +263,82 @@ function App() {
   };
   const updateForm = (key: keyof CaseInput, value: string) => setForm((current) => ({ ...current, [key]: value }));
 
+  const archivePanel = (
+    <div className="archive-card">
+      <div className="archive-heading">
+        <div><History size={16}/><span className="section-label">SESSION ARCHIVE</span></div>
+        <span className="archive-count">{archive.length} / 5</span>
+      </div>
+      {archive.length === 0 ? (
+        <div className="archive-empty">
+          <div className="empty-seal"><Gavel size={17}/></div>
+          <strong className="serif">The record is clear.</strong>
+          <p>Rulings will be filed here as soon as the first tiny trial concludes.</p>
+        </div>
+      ) : (
+        <div className="archive-list">
+          {archive.map((item, index) => (
+            <button className={`archive-item ${ruling?.id === item.id ? 'selected' : ''}`} type="button" key={item.id} onClick={() => reviewCase(item)} data-testid={`button-archive-${index}`} aria-label={`Review ruling ${index + 1}: ${item.dispute}`}>
+              <span className="archive-index">{String(index + 1).padStart(2, '0')}</span>
+              <span className="archive-item-body"><strong>{item.dispute}</strong><small>{item.plaintiff} v. {item.defendant}</small></span>
+              <span className="archive-verdict">{item.verdict === 'ABSOLUTELY GUILTY' ? 'GUILTY++' : item.verdict}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
   return (
-    <main className="app-shell">
+    <main className={`app-shell ${shake ? 'shaking' : ''}`} id="top">
       <header className="topbar">
-        <a className="brand" href="#top" aria-label="Petty Court home" data-testid="link-home"><span className="brand-seal"><Scale size={21}/></span><span>PETTY <b>COURT</b></span></a>
+        <a className="brand" href="#top" aria-label="Petty Court home" data-testid="link-home">
+          <span className="brand-seal"><Scale size={22}/></span>
+          <span className="brand-wordmark">PETTY <b>COURT</b><small>THE COURT OF VERY SMALL CLAIMS</small></span>
+        </a>
         <div className="topbar-right">
           <span className="docket-pill"><span className="live-dot"/> TODAY’S DOCKET <b>NO. {docket}</b></span>
           <button className="sound-toggle" type="button" onClick={() => setSound((current) => !current)} aria-pressed={sound} aria-label={sound ? 'Turn courtroom sounds off' : 'Turn courtroom sounds on'} data-testid="button-toggle-sound">
-            {sound ? <Volume2 size={17}/> : <VolumeX size={17}/>}<span>{sound ? 'Sound on' : 'Sound off'}</span>
+            {sound ? <Volume2 size={17}/> : <VolumeX size={17}/>}<span>{sound ? 'SOUND ON' : 'SOUND OFF'}</span>
           </button>
         </div>
       </header>
 
-      <section className="hero" id="top">
+      <section className="hero courtroom-stage" aria-labelledby="court-title">
+        <div className="stage-wall" aria-hidden="true"><span className="stage-column stage-column-left"/><span className="stage-column stage-column-right"/><span className="stage-arch"/><span className="stage-panel"/></div>
         <div className="hero-copy enter">
           <div className="eyebrow"><span className="eyebrow-line"/>THE PEOPLE’S COURT OF PETTINESS<span className="eyebrow-line"/></div>
-          <h1 className="serif">PETTY <i>COURT</i></h1>
-          <p>Justice for things that absolutely do not matter.</p>
-          <div className="hero-meta"><span><Gavel size={15}/> Open for extremely minor business</span><span className="hero-divider">·</span><span>Est. five minutes ago</span></div>
+          <h1 className="serif" id="court-title">PETTY<br/><i>COURT</i></h1>
+          <p>Justice for things that<br className="desktop-break"/> absolutely do not matter.</p>
+          <div className="hero-meta"><span><Gavel size={15}/> Open for extremely minor business</span><span className="hero-divider">/</span><span>Est. five minutes ago</span></div>
+          <a href="#filing" className="stage-link" data-testid="link-file-case"><span>Bring your case before the bench</span><ArrowRight size={15}/></a>
         </div>
-        <div className="judge-portrait" aria-label="Judge Reginald P. Pettiness">
-          <div className="portrait-star star-one">✦</div><div className="portrait-star star-two">✧</div>
-          <Judge verdict={ruling?.verdict} deliberating={busy}/>
+        <div className="judge-portrait">
+          <div className="portrait-star star-one"><Sparkles size={21}/></div><div className="portrait-star star-two"><Sparkles size={15}/></div>
+          <div className="portrait-arch"><div className="portrait-halo"/><Judge verdict={ruling?.verdict} deliberating={busy}/><div className="portrait-bench"/></div>
           <div className="judge-caption"><span className="caption-rule"/>THE HONORABLE<span className="caption-rule"/></div>
           <strong className="serif judge-name">Reginald P. Pettiness</strong>
           <small>CHIEF JUDGE · VERY SMALL CLAIMS</small>
         </div>
-        <div className="hero-arc" aria-hidden="true"/>
+        <div className="court-inscription"><span>BE IT KNOWN</span><span className="inscription-rule"/><span>EVERY LITTLE THING IS HEARD HERE</span></div>
       </section>
 
-      <div className={`court-content ${shake ? 'shaking' : ''}`}>
-         {busy && <div className="deliberation enter" role="status" aria-live="polite"><div className="delib-mark"><Gavel size={20}/></div><span className="delib-kicker">THE COURT IS DELIBERATING</span><strong className="serif">Consulting the Sacred Law of Minor Inconveniences...</strong><span className="delib-dots"><i/><i/><i/></span></div>}
+      <div className="court-content">
+        {busy && <div className="deliberation enter" role="status" aria-live="polite"><div className="delib-mark"><Gavel size={21}/></div><span className="delib-kicker">THE COURT IS DELIBERATING</span><strong className="serif">Consulting the Sacred Law of Minor Inconveniences…</strong><span className="delib-dots"><i/><i/><i/></span><small>Silence in the court, please.</small></div>}
         {view === 'ruling' && ruling && !busy ? (
           <section className="verdict-layout enter" ref={resultRef} aria-live="polite">
             <div className="ruling-paper paper-card court-frame">
-              <div className="ruling-topline"><span>IN THE COURT OF PETTY APPEALS</span><span>DOCKET NO. {ruling.docket}</span></div>
+              <div className="ruling-topline"><span>IN THE COURT OF VERY SMALL CLAIMS</span><span>DOCKET NO. {ruling.docket}</span></div>
               <div className="ruling-title">
-                <span className="ornament">✦ &nbsp; THE PEOPLE v. &nbsp; ✦</span>
+                <span className="ornament"><Sparkles size={13}/> &nbsp; THE PEOPLE v. &nbsp; <Sparkles size={13}/></span>
                 <h2 className="serif">{ruling.dispute}</h2>
                 <p>{ruling.plaintiff} <em>versus</em> {ruling.defendant}</p>
               </div>
               <div className="charge-box"><span className="section-label">FORMAL CHARGE</span><strong className="serif">{ruling.charge}</strong></div>
-              <div className="verdict-mark-wrap"><div className={`stamp ${stamp ? 'show' : ''}`}><span>THE COURT</span><b>{ruling.verdict}</b><span>HAS RULED</span></div></div>
+              <div className="verdict-stamp-area"><div className={`stamp ${stamp ? 'show' : ''}`} aria-label={`Verdict: ${ruling.verdict}`}><span>THE COURT</span><b>{ruling.verdict}</b><span>HAS RULED</span></div></div>
               <h3 className="verdict-heading serif">{ruling.verdict}</h3>
               <div className="reasoning"><span className="section-label">FINDINGS OF FACT & VERY LITTLE IMPORTANCE</span>{ruling.reasoning.map((sentence, index) => <p key={`${ruling.id}-${index}`}>{sentence}</p>)}</div>
-              <div className="sentence-box"><div><Gavel size={19}/><span className="section-label">THE SENTENCE</span></div><p className="serif">{ruling.punishment}</p></div>
+              <div className="sentence-box"><div><Gavel size={18}/><span className="section-label">THE SENTENCE</span></div><p className="serif">{ruling.punishment}</p></div>
               <div className="judge-last-word"><Judge verdict={ruling.verdict}/><div><span className="section-label">JUDGE REGINALD’S FINAL WORD</span><p className="serif">“{ruling.finalWord}”</p></div></div>
               <div className="ruling-footer"><span>SO ORDERED, WITH EXTREME PETTINESS</span><span>{ruling.timestamp}</span></div>
             </div>
@@ -307,26 +346,29 @@ function App() {
               <div className="aside-title"><span className="section-label">THE COURT HAS SPOKEN</span><h2 className="serif">A ruling for the ages.<br/><i>Or at least today.</i></h2></div>
               <div className="aside-actions">
                 <button className="action-button" type="button" onClick={copyTranscript} data-testid="button-copy-transcript"><Clipboard size={17}/> Copy transcript</button>
-                 <button className="appeal-button" type="button" onClick={() => runHearing(form, ruling)} disabled={busy} data-testid="button-appeal"><RotateCcw size={16}/> Appeal to Petty Supreme Court (Re-trial)</button>
+                <button className="appeal-button" type="button" onClick={() => runHearing(form, ruling)} disabled={busy} data-testid="button-appeal"><RotateCcw size={16}/> Appeal this ruling</button>
                 <button className="new-case-button" type="button" onClick={resetCase} data-testid="button-new-dispute"><ArrowLeft size={16}/> File a new dispute</button>
               </div>
               <div className="appeal-note"><Sparkles size={16}/><p>An appeal goes before the very same judge. He has promised to consider it with an entirely open mind.</p></div>
-              <div className="transcript-mini"><span className="section-label">THE RECORD</span><p>{ruling.plaintiff} brought suit against {ruling.defendant} over “{ruling.dispute}.”</p><button type="button" onClick={copyTranscript} data-testid="button-copy-record">📜 Copy the official record <ArrowRight size={13}/></button></div>
+              <div className="transcript-mini"><span className="section-label">THE RECORD</span><p>{ruling.plaintiff} brought suit against {ruling.defendant} over “{ruling.dispute}.”</p><button type="button" onClick={copyTranscript} data-testid="button-copy-record"><Clipboard size={14}/> Copy the official record <ArrowRight size={13}/></button></div>
+              <div className="archive-in-results">{archivePanel}</div>
             </aside>
           </section>
         ) : view === 'form' && !busy && (
-          <section className="filing-grid enter">
+          <section className="filing-grid enter" id="filing">
             <div className="form-column">
-              <div className="section-heading"><div><span className="step-number">01</span><div><span className="section-label">OPEN A CASE</span><h2 className="serif">What’s the <i>matter?</i></h2></div></div><span className="heading-note">This court takes all<br/>minor grievances seriously.</span></div>
+              <div className="section-heading"><div><span className="step-number">01</span><div><span className="section-label">OPEN A CASE</span><h2 className="serif">What’s the <i>matter?</i></h2></div></div><span className="heading-note">All minor grievances<br/>are solemnly heard.</span></div>
               <div className="sample-area">
-                <div className="sample-heading"><span>THE DAILY DISPUTES</span><span>OR FILE YOUR OWN →</span></div>
-                <div className="sample-list">{samples.map((sample) => <button type="button" className="sample-chip" key={sample.short} onClick={() => { setForm({ dispute: sample.dispute, defendant: sample.defendant, plaintiff: sample.plaintiff, defense: sample.defense, plaintiffArgument: sample.plaintiffArgument }); notify('Exhibit A has been entered. Names are yours to personalize.'); }} data-testid={`button-sample-${sample.category.toLowerCase()}`}><span>{sample.category}</span><strong>{sample.short}</strong><ArrowRight size={14}/></button>)}</div>
+                <div className="sample-heading"><span>THE DAILY DISPUTES</span><span>PICK A PRECEDENT</span></div>
+                <div className="sample-list">{samples.map((sample, index) => <button type="button" className="sample-chip" key={sample.short} onClick={() => { setForm({ dispute: sample.dispute, defendant: sample.defendant, plaintiff: sample.plaintiff, defense: sample.defense, plaintiffArgument: sample.plaintiffArgument }); notify('Exhibit A has been entered. Names are yours to personalize.'); }} data-testid={`button-sample-${sample.category.toLowerCase()}`}><span className="sample-index">0{index + 1}</span><span className="sample-category">{sample.category}</span><strong>{sample.short}</strong><ArrowRight size={14}/></button>)}</div>
               </div>
-              <form className="filing-form" onSubmit={submit}>
+              <form className="filing-form paper-card" onSubmit={submit}>
+                <div className="form-heading"><span className="filing-stamp"><ScrollText size={18}/></span><div><span className="section-label">OFFICIAL PETITION</span><h3 className="serif">State your case.</h3></div><span className="filing-code">FORM PC–01<br/>FILED IN DUPLICATE</span></div>
+                <div className="form-rule"/>
                 <div className="form-row"><label className="wide-field"><span>THE DISPUTE <i>— what happened?</i><b>*</b></span><input className="field" value={form.dispute} onChange={(e) => updateForm('dispute', e.target.value)} placeholder="e.g. They ate my clearly labeled leftovers" required maxLength={150} data-testid="input-dispute"/></label></div>
                 <div className="form-row"><label><span>THE DEFENDANT <i>— the accused</i><b>*</b></span><input className="field" value={form.defendant} onChange={(e) => updateForm('defendant', e.target.value)} placeholder="Name or title" required maxLength={48} data-testid="input-defendant"/></label><label><span>THE PLAINTIFF <i>— the wronged</i><b>*</b></span><input className="field" value={form.plaintiff} onChange={(e) => updateForm('plaintiff', e.target.value)} placeholder="Name or title" required maxLength={48} data-testid="input-plaintiff"/></label></div>
                 <div className="form-row"><label><span>THE DEFENSE <i>— optional</i></span><textarea className="field" rows={2} value={form.defense} onChange={(e) => updateForm('defense', e.target.value)} placeholder="“It was already open…”" maxLength={220} data-testid="input-defense"/></label><label><span>THE PLAINTIFF’S ARGUMENT <i>— optional</i></span><textarea className="field" rows={2} value={form.plaintiffArgument} onChange={(e) => updateForm('plaintiffArgument', e.target.value)} placeholder="“I have receipts. Actual receipts.”" maxLength={220} data-testid="input-plaintiff-argument"/></label></div>
-                 <div className="summon-row"><button className="action-button summon-button" type="submit" disabled={busy} data-testid="button-summon"><span>⚖️</span> SUMMON THE JUDGE &amp; BANG GAVEL <ArrowRight size={18}/></button><span className="summon-caption">1.2 seconds to justice<br/><small>Absolutely no legal standing.</small></span></div>
+                <div className="summon-row"><button className="action-button summon-button" type="submit" disabled={busy} data-testid="button-summon"><Scale size={20}/> SUMMON THE JUDGE <Gavel size={18}/></button><span className="summon-caption">1.2 seconds to justice<br/><small>Absolutely no legal standing.</small></span></div>
               </form>
               <div className="privacy-note"><Info size={15}/><span>Your case stays right here in this browser session. No lawyers, no servers, no actual consequences.</span></div>
             </div>
@@ -336,13 +378,10 @@ function App() {
                 <div className="docket-count"><strong className="serif">{String(archive.length + 18).padStart(2, '0')}</strong><span>petty matters<br/>heard today</span></div>
                 <div className="docket-progress"><span style={{ width: `${Math.min(96, 28 + archive.length * 9)}%` }}/></div>
                 <p className="docket-note">A brisk day on the bench. The Court is in excellent spirits.</p>
+                <div className="docket-engraving"><Scale size={31}/><span>COURT<br/>IN SESSION</span></div>
               </div>
-              <div className="archive-card">
-                <div className="archive-heading"><div><History size={17}/><span className="section-label">RECENT RULINGS</span></div><span>{archive.length} / 5</span></div>
-                {archive.length === 0 ? <div className="archive-empty"><div className="empty-seal"><Gavel size={18}/></div><strong className="serif">A clean slate.</strong><p>Your first tiny trial awaits. Past rulings will be kept here for the session.</p></div> :
-                  <div className="archive-list">{archive.map((item, index) => <button className={`archive-item ${ruling?.id === item.id ? 'selected' : ''}`} type="button" key={item.id} onClick={() => reviewCase(item)} data-testid={`button-archive-${index}`}><span className="archive-index">{String(index + 1).padStart(2, '0')}</span><span className="archive-item-body"><strong>{item.dispute}</strong><small>{item.plaintiff} v. {item.defendant}</small></span><span className="archive-verdict">{item.verdict === 'ABSOLUTELY GUILTY' ? 'GUILTY++' : item.verdict}</span></button>)}</div>}
-              </div>
-              <div className="court-motto"><span className="motto-rule"/>“Small matters. Large feelings.”<span className="motto-rule"/></div>
+              {archivePanel}
+              <div className="court-motto"><span className="motto-rule"/><span>Small matters.<br/><i>Large feelings.</i></span><span className="motto-rule"/></div>
             </aside>
           </section>
         )}
