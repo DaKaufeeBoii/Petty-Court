@@ -37,6 +37,8 @@ node_modules
 /.sass-cache
 /connect.lock
 /coverage
+/artifacts/petty-court/test-results/
+/artifacts/petty-court/playwright-report/
 /libpeerconnection.log
 npm-debug.log
 yarn-error.log
