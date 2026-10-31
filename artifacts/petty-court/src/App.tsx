@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import confetti from 'canvas-confetti';
+import courtroomArtwork from '@assets/image_1793448995055.png';
 import {
   ArrowLeft, ArrowRight, BookOpen, Check, Clipboard,
   Gavel, History, Info, RotateCcw, Scale, ScrollText, Sparkles, Volume2, VolumeX,
@@ -305,20 +306,20 @@ function App() {
       </header>
 
       <section className="hero courtroom-stage" aria-labelledby="court-title">
-        <div className="stage-wall" aria-hidden="true"><span className="stage-column stage-column-left"/><span className="stage-column stage-column-right"/><span className="stage-arch"/><span className="stage-panel"/></div>
         <div className="hero-copy enter">
-          <div className="eyebrow"><span className="eyebrow-line"/>THE PEOPLE’S COURT OF PETTINESS<span className="eyebrow-line"/></div>
-          <h1 className="serif" id="court-title">PETTY<br/><i>COURT</i></h1>
-          <p>Justice for things that<br className="desktop-break"/> absolutely do not matter.</p>
+          <div className="eyebrow"><span className="eyebrow-line"/>NOW HEARING: VERY SMALL CLAIMS</div>
+          <h1 className="serif" id="court-title">The court<br/>of <i>petty.</i></h1>
+          <p>For the little things that<br className="desktop-break"/> somehow became a whole thing.</p>
           <div className="hero-meta"><span><Gavel size={15}/> Open for extremely minor business</span><span className="hero-divider">/</span><span>Est. five minutes ago</span></div>
-          <a href="#filing" className="stage-link" data-testid="link-file-case"><span>Bring your case before the bench</span><ArrowRight size={15}/></a>
+          <a href="#filing" className="stage-link" data-testid="link-file-case"><span>File your extremely important case</span><ArrowRight size={15}/></a>
         </div>
-        <div className="judge-portrait">
-          <div className="portrait-star star-one"><Sparkles size={21}/></div><div className="portrait-star star-two"><Sparkles size={15}/></div>
-          <div className="portrait-arch"><div className="portrait-halo"/><Judge verdict={ruling?.verdict} deliberating={busy}/><div className="portrait-bench"/></div>
-          <div className="judge-caption"><span className="caption-rule"/>THE HONORABLE<span className="caption-rule"/></div>
-          <strong className="serif judge-name">Reginald P. Pettiness</strong>
-          <small>CHIEF JUDGE · VERY SMALL CLAIMS</small>
+        <div className="hero-art-wrap">
+          <div className="art-ticket"><span>EXHIBIT A</span><span>THE COURT IN SESSION</span></div>
+          <div className="hero-art-frame">
+            <img src={courtroomArtwork} alt="A furious white-wigged judge slams his gavel in a chaotic, warmly illustrated courtroom." className="hero-art" />
+            <span className="art-caption">JUSTICE, WITH A SIDE OF DRAMA</span>
+          </div>
+          <div className="art-side-note"><Sparkles className="note-star" size={20}/><span>Small grievance.<br/><b>Monumental proceedings.</b></span></div>
         </div>
         <div className="court-inscription"><span>BE IT KNOWN</span><span className="inscription-rule"/><span>EVERY LITTLE THING IS HEARD HERE</span></div>
       </section>
