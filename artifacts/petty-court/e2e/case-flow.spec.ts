@@ -78,6 +78,58 @@ test('a user can file, appeal, review, copy, and restart a petty case', async ({
   await expect(page.locator('.ruling-title h2')).toHaveText('Putting the empty milk carton back in the fridge.');
 });
 
+test('a maximum-length dispute and party names fit in the downloaded ruling image', async ({ page }) => {
+  await page.goto('/');
+
+  const dispute = 'An unusually long household dispute about an extremely important matter '.repeat(3).slice(0, 150);
+  const defendant = 'The defendant with a very long formal name '.repeat(2).slice(0, 48);
+  const plaintiff = 'The plaintiff with a very long formal name '.repeat(2).slice(0, 48);
+  await page.getByTestId('input-dispute').fill(dispute);
+  await page.getByTestId('input-defendant').fill(defendant);
+  await page.getByTestId('input-plaintiff').fill(plaintiff);
+  await expect(page.getByTestId('input-dispute')).toHaveValue(dispute);
+  await expect(page.getByTestId('input-defendant')).toHaveValue(defendant);
+  await expect(page.getByTestId('input-plaintiff')).toHaveValue(plaintiff);
+
+  await page.getByTestId('button-summon').click();
+  await expect(page.locator('.ruling-title h2')).toHaveText(dispute, { timeout: 5_000 });
+  await expect(page.locator('.ruling-title p')).toContainText(plaintiff);
+  await expect(page.locator('.ruling-title p')).toContainText(defendant);
+
+  const downloadPromise = page.waitForEvent('download');
+  await page.getByTestId('button-download-ruling-image').click();
+  const download = await downloadPromise;
+  const imagePath = await download.path();
+  if (!imagePath) throw new Error('The long ruling image download did not produce a file.');
+
+  const imageBytes = await readFile(imagePath);
+  expect([...imageBytes.subarray(0, 8)]).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+  expect(imageBytes.readUInt32BE(16)).toBe(1080);
+  const imageHeight = imageBytes.readUInt32BE(20);
+  expect(imageHeight).toBeGreaterThan(1500);
+
+  const footerInkPixels = await page.evaluate(async (base64Image) => {
+    const image = new Image();
+    image.src = `data:image/png;base64,${base64Image}`;
+    await image.decode();
+    const canvas = document.createElement('canvas');
+    canvas.width = image.width;
+    canvas.height = image.height;
+    const context = canvas.getContext('2d');
+    if (!context) throw new Error('Could not inspect the downloaded ruling image.');
+    context.drawImage(image, 0, 0);
+    const footerTop = Math.max(0, image.height - 70);
+    const pixels = context.getImageData(180, footerTop, 720, image.height - footerTop - 3).data;
+    let inkPixels = 0;
+    for (let index = 0; index < pixels.length; index += 4) {
+      if (pixels[index] < 180 && pixels[index + 1] < 155 && pixels[index + 2] < 120) inkPixels++;
+    }
+    return inkPixels;
+  }, imageBytes.toString('base64'));
+  expect(footerInkPixels).toBeGreaterThan(100);
+  await expect(page.getByRole('status')).toContainText('Ruling image downloaded.');
+});
+
 test('the archive keeps only the five newest rulings in newest-first order', async ({ page }) => {
   await page.goto('/');
 
