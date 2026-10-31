@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
 
 test('a user can file, appeal, review, copy, and restart a petty case', async ({ page, context }) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
@@ -44,6 +45,18 @@ test('a user can file, appeal, review, copy, and restart a petty case', async ({
   await page.getByTestId('button-archive-1').click();
   await expect(verdict).toHaveText(firstVerdict);
   await expect(page.locator('.ruling-title h2')).toHaveText('Putting the empty milk carton back in the fridge.');
+
+  const downloadPromise = page.waitForEvent('download');
+  await page.getByTestId('button-download-ruling-image').click();
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toMatch(/^petty-court-.*\.png$/);
+  const imagePath = await download.path();
+  if (!imagePath) throw new Error('The ruling image download did not produce a file.');
+  const imageBytes = await readFile(imagePath);
+  expect([...imageBytes.subarray(0, 8)]).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+  expect(imageBytes.readUInt32BE(16)).toBe(1080);
+  expect(imageBytes.readUInt32BE(20)).toBeGreaterThan(1200);
+  await expect(page.getByRole('status')).toContainText('Ruling image downloaded.');
 
   await page.getByTestId('button-copy-transcript').click();
   await expect(page.getByRole('status')).toContainText('Transcript copied.');

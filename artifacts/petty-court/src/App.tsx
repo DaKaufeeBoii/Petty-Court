@@ -3,7 +3,7 @@ import confetti from 'canvas-confetti';
 import courtroomArtwork from '@assets/image_1793448995055.png';
 import {
   ArrowLeft, ArrowRight, BookOpen, Check, Clipboard,
-  Gavel, History, Info, RotateCcw, Scale, ScrollText, Sparkles, Volume2, VolumeX,
+  Download, Gavel, History, Info, RotateCcw, Scale, ScrollText, Sparkles, Volume2, VolumeX,
   X,
 } from 'lucide-react';
 
@@ -118,6 +118,151 @@ function getDocket() {
   const seed = Number(`${day.getFullYear()}${String(day.getMonth() + 1).padStart(2, '0')}${String(day.getDate()).padStart(2, '0')}`);
   const base = (seed * 37) % 641 + 120;
   return String(base).padStart(4, '0');
+}
+
+function drawWrappedText(
+  context: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+  maxWidth: number,
+  lineHeight: number,
+) {
+  const paragraphs = text.split('\n');
+  for (const paragraph of paragraphs) {
+    const words = paragraph.split(/\s+/).filter(Boolean);
+    let line = '';
+    for (const word of words) {
+      const candidate = line ? `${line} ${word}` : word;
+      if (context.measureText(candidate).width <= maxWidth) {
+        line = candidate;
+        continue;
+      }
+      if (line) {
+        context.fillText(line, x, y);
+        y += lineHeight;
+        line = '';
+      }
+      if (context.measureText(word).width <= maxWidth) {
+        line = word;
+        continue;
+      }
+      let fragment = '';
+      for (const character of word) {
+        if (fragment && context.measureText(`${fragment}${character}`).width > maxWidth) {
+          context.fillText(fragment, x, y);
+          y += lineHeight;
+          fragment = '';
+        }
+        fragment += character;
+      }
+      line = fragment;
+    }
+    if (line) {
+      context.fillText(line, x, y);
+      y += lineHeight;
+    }
+    y += lineHeight * 0.2;
+  }
+  return y;
+}
+
+function drawRulingCard(context: CanvasRenderingContext2D, ruling: Ruling) {
+  const width = 1080;
+  const center = width / 2;
+  context.fillStyle = '#582334';
+  context.fillRect(0, 0, width, context.canvas.height);
+  context.fillStyle = '#f5ead1';
+  context.fillRect(30, 30, width - 60, context.canvas.height - 60);
+  context.strokeStyle = '#b99552';
+  context.lineWidth = 3;
+  context.strokeRect(48, 48, width - 96, context.canvas.height - 96);
+  context.strokeStyle = 'rgba(119, 83, 47, 0.35)';
+  context.lineWidth = 1;
+  context.strokeRect(58, 58, width - 116, context.canvas.height - 116);
+
+  context.textAlign = 'center';
+  context.fillStyle = '#74243a';
+  context.font = '800 48px Fraunces, Georgia, serif';
+  context.fillText('PETTY COURT', center, 132);
+  context.fillStyle = '#806749';
+  context.font = '500 18px "DM Mono", monospace';
+  context.fillText('THE COURT OF VERY SMALL CLAIMS', center, 166);
+  context.fillStyle = '#916b31';
+  context.font = '500 18px "DM Mono", monospace';
+  context.fillText(`OFFICIAL RULING  ·  DOCKET NO. ${ruling.docket}`, center, 222);
+
+  context.strokeStyle = '#c8b18a';
+  context.lineWidth = 2;
+  context.beginPath();
+  context.moveTo(132, 260);
+  context.lineTo(948, 260);
+  context.stroke();
+
+  context.fillStyle = '#916b31';
+  context.font = '500 18px "DM Mono", monospace';
+  context.fillText('IN THE MATTER OF', center, 318);
+  context.fillStyle = '#572035';
+  context.font = '700 54px Fraunces, Georgia, serif';
+  let y = drawWrappedText(context, ruling.dispute, center, 390, 820, 66);
+
+  y += 18;
+  context.strokeStyle = '#c8b18a';
+  context.beginPath();
+  context.moveTo(202, y);
+  context.lineTo(878, y);
+  context.stroke();
+  y += 48;
+  context.textAlign = 'left';
+  context.fillStyle = '#916b31';
+  context.font = '500 17px "DM Mono", monospace';
+  context.fillText('PLAINTIFF', 150, y);
+  context.fillText('DEFENDANT', 568, y);
+  y += 40;
+  context.fillStyle = '#463328';
+  context.font = '600 31px Fraunces, Georgia, serif';
+  const plaintiffEnd = drawWrappedText(context, ruling.plaintiff, 150, y, 350, 39);
+  const defendantEnd = drawWrappedText(context, ruling.defendant, 568, y, 350, 39);
+  y = Math.max(plaintiffEnd, defendantEnd) + 24;
+
+  context.fillStyle = '#eee1c6';
+  context.fillRect(112, y, 856, 190);
+  context.strokeStyle = '#b99552';
+  context.lineWidth = 2;
+  context.strokeRect(112, y, 856, 190);
+  context.textAlign = 'center';
+  context.fillStyle = '#916b31';
+  context.font = '500 17px "DM Mono", monospace';
+  context.fillText('THE COURT FINDS', center, y + 43);
+  context.fillStyle = '#74243a';
+  context.font = '800 49px Fraunces, Georgia, serif';
+  drawWrappedText(context, ruling.verdict, center, y + 105, 760, 57);
+  y += 230;
+
+  context.textAlign = 'left';
+  context.fillStyle = '#916b31';
+  context.font = '500 18px "DM Mono", monospace';
+  context.fillText('THE SENTENCE', 150, y);
+  y += 48;
+  context.fillStyle = '#582034';
+  context.font = '600 32px Fraunces, Georgia, serif';
+  y = drawWrappedText(context, ruling.punishment, 150, y, 780, 43);
+
+  y += 28;
+  context.strokeStyle = '#c8b18a';
+  context.beginPath();
+  context.moveTo(132, y);
+  context.lineTo(948, y);
+  context.stroke();
+  y += 48;
+  context.textAlign = 'center';
+  context.fillStyle = '#74243a';
+  context.font = '600 23px Fraunces, Georgia, serif';
+  context.fillText('JUSTICE FOR THINGS THAT ABSOLUTELY DO NOT MATTER.', center, y);
+  context.fillStyle = '#806749';
+  context.font = '500 16px "DM Mono", monospace';
+  context.fillText('SO ORDERED, WITH EXTREME PETTINESS', center, y + 34);
+  return y + 92;
 }
 
 function Judge({ verdict, deliberating = false }: { verdict?: VerdictName; deliberating?: boolean }) {
@@ -253,6 +398,37 @@ function App() {
       await navigator.clipboard.writeText(text); notify('Transcript copied. The group chat is now in session.');
     } catch { notify('Clipboard unavailable here — select and copy the transcript text instead.'); }
   };
+  const downloadRulingImage = async () => {
+    if (!ruling) return;
+    try {
+      await document.fonts?.ready;
+      const canvas = document.createElement('canvas');
+      canvas.width = 1080;
+      canvas.height = 2400;
+      const context = canvas.getContext('2d');
+      if (!context) throw new Error('Canvas is unavailable');
+      const cardHeight = drawRulingCard(context, ruling);
+      canvas.height = cardHeight;
+      const finalContext = canvas.getContext('2d');
+      if (!finalContext) throw new Error('Canvas is unavailable');
+      drawRulingCard(finalContext, ruling);
+      const image = await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('Image export failed')), 'image/png');
+      });
+      const url = URL.createObjectURL(image);
+      const link = document.createElement('a');
+      const safeName = ruling.dispute.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'ruling';
+      link.href = url;
+      link.download = `petty-court-${safeName}.png`;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+      notify('Ruling image downloaded. Justice is ready to share.');
+    } catch {
+      notify('This browser could not create the ruling image. Please try again in a modern browser.');
+    }
+  };
   const resetCase = () => {
     window.clearTimeout(timeoutRef.current);
     setBusy(false); setForm(blank); setRuling(null); setView('form'); setStamp(false);
@@ -346,6 +522,7 @@ function App() {
             <aside className="ruling-aside">
               <div className="aside-title"><span className="section-label">THE COURT HAS SPOKEN</span><h2 className="serif">A ruling for the ages.<br/><i>Or at least today.</i></h2></div>
               <div className="aside-actions">
+                <button className="action-button" type="button" onClick={downloadRulingImage} data-testid="button-download-ruling-image"><Download size={17}/> Download ruling image</button>
                 <button className="action-button" type="button" onClick={copyTranscript} data-testid="button-copy-transcript"><Clipboard size={17}/> Copy transcript</button>
                 <button className="appeal-button" type="button" onClick={() => runHearing(form, ruling)} disabled={busy} data-testid="button-appeal"><RotateCcw size={16}/> Appeal this ruling</button>
                 <button className="new-case-button" type="button" onClick={resetCase} data-testid="button-new-dispute"><ArrowLeft size={16}/> File a new dispute</button>
